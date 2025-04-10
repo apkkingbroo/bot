@@ -9,17 +9,15 @@ CHANNEL_ID = -1001992550549
 REFERRAL_LINK = "https://bdgwin.cc/#/register?invitationCode=372171400520"
 
 subscribed_users = set()
-
 colors = ["🔴 RED", "🟢 GREEN", "🟣 VIOLET"]
 numbers = list(range(0, 10))
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
     keyboard = [[InlineKeyboardButton("✅ Join Channel", url="https://t.me/apkmodderking")],
                 [InlineKeyboardButton("I have Joined", callback_data="check")]]
     
     await update.message.reply_text(
-        f"✨ **Welcome to Color Predictor VIP!** ✨\n\n"
+        f"✨ *Welcome to Color Predictor VIP!* ✨\n\n"
         f"Join our official channel to receive predictions every minute!\n\n"
         f"🔗 *Connected to BDGWIN:*\n{REFERRAL_LINK}\n\n"
         f"Click below to join & confirm.",
@@ -67,21 +65,21 @@ async def send_predictions(application):
         await asyncio.sleep(60)
 
 async def main():
-    application = ApplicationBuilder().token(BOT_TOKEN).build()
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CallbackQueryHandler(button))
+    asyncio.create_task(send_predictions(app))
+    await app.initialize()
+    await app.start()
+    print("Bot is running...")
+    await app.updater.start_polling()
+    await app.updater.idle()
 
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CallbackQueryHandler(button))
+# ---- SAFELY RUN ON RENDER ----
+try:
+    loop = asyncio.get_event_loop()
+except RuntimeError:
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
-    asyncio.create_task(send_predictions(application))
-    await application.run_polling()
-
-if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except RuntimeError as e:
-        if "event loop is already running" in str(e) or "Cannot close a running event loop" in str(e):
-            loop = asyncio.get_event_loop()
-            loop.create_task(main())
-            loop.run_forever()
-        else:
-            raise
+loop.run_until_complete(main())
